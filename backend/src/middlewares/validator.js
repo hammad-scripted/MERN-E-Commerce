@@ -4,15 +4,7 @@ import ApiError from '../utils/apiError.js';
 
 const userValidationRules = () => {
   return [
-    body('fullName')
-      .trim()
-      .notEmpty()
-      .withMessage('Full name is required'),
-
-    body('username')
-      .trim()
-      .notEmpty()
-      .withMessage('Username is required'),
+    body('name').trim().notEmpty().withMessage('Name is required'),
 
     body('email')
       .trim()
@@ -42,11 +34,7 @@ const validate = (req, res, next) => {
   }));
 
   return next(
-    new ApiError(
-      StatusCodes.BAD_REQUEST,
-      'Validation Error',
-      extractedErrors
-    )
+    new ApiError(StatusCodes.BAD_REQUEST, 'Validation Error', extractedErrors),
   );
 };
 

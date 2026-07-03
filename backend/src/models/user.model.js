@@ -1,6 +1,7 @@
 import { Schema, model } from 'mongoose';
 import bcrypt from 'bcryptjs';
 import ApiError from '../utils/apiError.js';
+
 const userSchema = new Schema(
   {
     name: {
@@ -15,11 +16,13 @@ const userSchema = new Schema(
       lowercase: true,
       trim: true,
     },
+
     password: {
       type: String,
       required: true,
       minLength: 6,
     },
+
     cartItems: [
       {
         quantity: {
@@ -28,10 +31,12 @@ const userSchema = new Schema(
         },
       },
     ],
+
     product: {
-      type: Mongoose.Schema.Types.ObjectId,
+      type: Schema.Types.ObjectId,
       ref: 'Product',
     },
+
     role: {
       type: String,
       enum: ['customer', 'admin'],
@@ -43,28 +48,23 @@ const userSchema = new Schema(
   },
 );
 
-// ? password hashing using bcrypt and mongoose prehook
-
+// Password hashing
 userSchema.pre('save', async function () {
-  if (!this.isModified('password')) return 
+  if (!this.isModified('password')) return;
 
-  try{
+  try {
+    const salt = await bcrypt.genSalt(10);
+    const hash = await bcrypt.hash(this.password, salt);
 
-      const salt = await bcrypt.genSalt(10);
-      const hash = await bcrypt.hash(this.password, salt);
-      this.password = password;
+    this.password = hash;
+  } catch (error) {
+    throw new ApiError(500, 'Password hashing failed', [error.message]);
   }
-  catch(error){
-    console.log(error);
-
-    throw new ApiError(500, 'Password hashing failed', [], error);
-  }
-
 });
 
-// ? compare password using bcrypt and mongoose instance method
-
+// Compare password
 userSchema.methods.comparePassword = async function (password) {
-  return await bcrypt.compare(password, this.password);
+  return bcrypt.compare(password, this.password);
 };
+
 export const User = model('User', userSchema);
