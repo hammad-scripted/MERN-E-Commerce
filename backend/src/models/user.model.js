@@ -1,5 +1,6 @@
 import { Schema, model } from 'mongoose';
-
+import bcrypt from 'bcryptjs';
+import ApiError from '../utils/apiError.js';
 const userSchema = new Schema(
   {
     name: {
@@ -42,4 +43,28 @@ const userSchema = new Schema(
   },
 );
 
+// ? password hashing using bcrypt and mongoose prehook
+
+userSchema.pre('save', async function () {
+  if (!this.isModified('password')) return 
+
+  try{
+
+      const salt = await bcrypt.genSalt(10);
+      const hash = await bcrypt.hash(this.password, salt);
+      this.password = password;
+  }
+  catch(error){
+    console.log(error);
+
+    throw new ApiError(500, 'Password hashing failed', [], error);
+  }
+
+});
+
+// ? compare password using bcrypt and mongoose instance method
+
+userSchema.methods.comparePassword = async function (password) {
+  return await bcrypt.compare(password, this.password);
+};
 export const User = model('User', userSchema);
