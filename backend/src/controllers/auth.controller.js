@@ -3,6 +3,8 @@ import ApiResponse from '../utils/apiResponse.js';
 import { StatusCodes } from 'http-status-codes';
 import { User } from '../models/user.model.js';
 import { generateTokens } from '../utils/token.js';
+import { generateAccessToken } from '../utils/token.js';
+import { generateRefreshToken } from '../utils/token.js';
 import { storeRefreshToken } from '../utils/token.js';
 import { verifyAccessToken, verifyRefreshToken } from '../utils/token.js';
 import client from '../lib/redis.js';
@@ -110,5 +112,51 @@ export const logout = async (req, res, next) => {
     .status(StatusCodes.OK)
     .json(
       new ApiResponse(StatusCodes.OK, null, 'User logged out successfully'),
+    );
+};
+
+export const refreshToken = async (req, res, next) => {
+  const refreshToken = req.cookies.refreshToken;
+
+  if (!refreshToken) {
+    return res
+      .status(StatusCodes.UNAUTHORIZED)
+      .json(new ApiError(StatusCodes.UNAUTHORIZED, null, 'Unauthorized'));
+  }
+
+  const decodedToken = verifyRefreshToken(refreshToken);
+  const storedToken = await client.get(`refreshToken-${decodedToken.userId}`);
+
+  if (!storedToken || storedToken !== refreshToken) {
+    return res
+      .status(StatusCodes.UNAUTHORIZED)
+      .json(new ApiError(StatusCodes.UNAUTHORIZED, null, 'Unauthorized'));
+  }
+
+  const accessToken = generateAccessToken(decodedToken.userId);
+  const user = await User.findById(decodedToken.userId).select('-password');
+  setCookies(res, accessToken, refreshToken);
+  return res
+    .status(StatusCodes.OK)
+    .json(
+      new ApiResponse(StatusCodes.OK, user, 'Token refreshed successfully'),
+    );
+};
+
+export const getProfile = async (req, res, next) => {
+  const user = await User.findById(req.user.userId).select('-password');
+  if (!user) {
+    return res
+      .status(StatusCodes.NOT_FOUND)
+      .json(new ApiError(StatusCodes.NOT_FOUND, null, 'User not found'));
+  }
+  return res
+    .status(StatusCodes.OK)
+    .json(
+      new ApiResponse(
+        StatusCodes.OK,
+        user,
+        'User profile fetched successfully',
+      ),
     );
 };

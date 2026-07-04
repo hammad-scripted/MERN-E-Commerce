@@ -13,13 +13,13 @@ export const generateTokens = (id) => {
     refreshToken,
   };
 };
-const generateAccessToken = (id) => {
+export const generateAccessToken = (id) => {
   return jwt.sign({ userId: id }, process.env.JWT_SECRET, {
     expiresIn: process.env.JWT_EXPIRES_IN,
   });
 };
 
-const generateRefreshToken = (id) => {
+export const generateRefreshToken = (id) => {
   return jwt.sign({ userId: id }, process.env.JWT_REFRESH_SECRET, {
     expiresIn: process.env.JWT_REFRESH_EXPIRES_IN,
   });
