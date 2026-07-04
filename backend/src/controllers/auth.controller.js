@@ -121,7 +121,7 @@ export const refreshToken = async (req, res, next) => {
   if (!refreshToken) {
     return res
       .status(StatusCodes.UNAUTHORIZED)
-      .json(new ApiError(StatusCodes.UNAUTHORIZED, null, 'Unauthorized'));
+      .json(new ApiError(StatusCodes.UNAUTHORIZED, null, 'Unauthorized:You need to login first!'));
   }
 
   const decodedToken = verifyRefreshToken(refreshToken);
@@ -130,7 +130,7 @@ export const refreshToken = async (req, res, next) => {
   if (!storedToken || storedToken !== refreshToken) {
     return res
       .status(StatusCodes.UNAUTHORIZED)
-      .json(new ApiError(StatusCodes.UNAUTHORIZED, null, 'Unauthorized'));
+      .json(new ApiError(StatusCodes.UNAUTHORIZED, null, 'Unauthorized:Token is not valid'));
   }
 
   const accessToken = generateAccessToken(decodedToken.userId);
@@ -144,7 +144,7 @@ export const refreshToken = async (req, res, next) => {
 };
 
 export const getProfile = async (req, res, next) => {
-  const user = await User.findById(req.user.userId).select('-password');
+  const user = await User.findById(req.user._id).select('-password');
   if (!user) {
     return res
       .status(StatusCodes.NOT_FOUND)
