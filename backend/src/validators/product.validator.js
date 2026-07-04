@@ -21,9 +21,12 @@ export const productValidationRules = () => {
     body('image')
       .trim()
       .notEmpty()
-      .withMessage('Image is required')
-      .isURL()
-      .withMessage('Image must be a valid URL'),
+      .withMessage('Image is required'),
+
+    body('category')
+      .trim()
+      .notEmpty()
+      .withMessage('Category is required'),
 
     body('isFeatured')
       .optional()

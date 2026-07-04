@@ -3,6 +3,9 @@ import { Router } from 'express';
 import {
   getAllProducts,
   getFeaturedProducts,
+  createProducts,
+  deleteProduct,
+  getRecommendedProducts
 } from '../controllers/product.controller.js';
 import { protectRoute } from '../middlewares/protect.js';
 import { adminRoute } from '../middlewares/protect.js';
@@ -12,6 +15,7 @@ export const router = Router();
 
 router.get('/', protectRoute, adminRoute, getAllProducts);
 router.get('/featured', getFeaturedProducts);
+router.get("/recommended",protectRoute,getRecommendedProducts);
 router.post(
   '/',
   protectRoute,
@@ -20,3 +24,5 @@ router.post(
   validate,
   createProducts,
 );
+
+router.delete('/:id', protectRoute, adminRoute, deleteProduct); 
