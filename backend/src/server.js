@@ -3,9 +3,10 @@ dotenv.config();
 import dns from 'node:dns/promises';
 dns.setServers(['8.8.8.8', '1.1.1.1']);
 
-
+import cookieParser from 'cookie-parser';
 import express from 'express';
 import chalk from 'chalk';
+import morgan from 'morgan';
 
 import errorHandler from './errors/errorHandler.js';
 import notFound from './errors/notFound.js';
@@ -20,6 +21,8 @@ import { router as authRouter } from './routes/auth.route.js';
 // Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
+app.use(morgan("dev"));
 
 // Routes
 app.use('/api/v1/auth', authRouter);
@@ -36,15 +39,11 @@ const startServer = async () => {
 
     app.listen(PORT, () => {
       console.log(
-        chalk.blueBright.bold.underline(
-          `Server is running on port ${PORT}`,
-        ),
+        chalk.blueBright.bold.underline(`Server is running on port ${PORT}`),
       );
     });
   } catch (error) {
-    console.log(
-      chalk.redBright.bold.underline(`Error: ${error}`),
-    );
+    console.log(chalk.redBright.bold.underline(`Error: ${error}`));
 
     process.exit(1);
   }
