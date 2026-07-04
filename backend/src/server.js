@@ -17,15 +17,17 @@ const PORT = process.env.PORT || 5000;
 const app = express();
 
 import { router as authRouter } from './routes/auth.route.js';
+import { router as productRouter } from './routes/product.route.js ';
 
 // Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
-app.use(morgan("dev"));
+app.use(morgan('dev'));
 
 // Routes
 app.use('/api/v1/auth', authRouter);
+app.use('/api/v1/product', productRouter);
 
 // Error Middlewares
 app.use(notFound);
