@@ -5,7 +5,9 @@ import {
   getFeaturedProducts,
   createProducts,
   deleteProduct,
-  getRecommendedProducts
+  getRecommendedProducts,
+  getProductsByCategory,
+  toggleFeaturedProduct,
 } from '../controllers/product.controller.js';
 import { protectRoute } from '../middlewares/protect.js';
 import { adminRoute } from '../middlewares/protect.js';
@@ -15,7 +17,8 @@ export const router = Router();
 
 router.get('/', protectRoute, adminRoute, getAllProducts);
 router.get('/featured', getFeaturedProducts);
-router.get("/recommended",protectRoute,getRecommendedProducts);
+router.get('/recommended', protectRoute, getRecommendedProducts);
+router.get('/category/:category', protectRoute, getProductsByCategory);
 router.post(
   '/',
   protectRoute,
@@ -24,5 +27,5 @@ router.post(
   validate,
   createProducts,
 );
-
-router.delete('/:id', protectRoute, adminRoute, deleteProduct); 
+router.patch('/:id', protectRoute, adminRoute, toggleFeaturedProduct);
+router.delete('/:id', protectRoute, adminRoute, deleteProduct);

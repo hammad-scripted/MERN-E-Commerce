@@ -108,4 +108,79 @@ export const deleteProduct = async (req, res, next) => {
   }
 };
 
-export const getRecommendedProducts = async (req, res, next) => {};
+export const getRecommendedProducts = async (req, res, next) => {
+  const products = await Product.aggregate([
+    { $sample: { size: 3 } },
+    {
+      $project: {
+        _id: 1,
+        name: 1,
+        image: 1,
+        description: 1,
+        price: 1,
+      },
+    },
+  ]);
+
+  return res
+    .status(StatusCodes.OK)
+    .json(
+      new ApiResponse(
+        StatusCodes.OK,
+        products,
+        'Recommended products fetched successfully',
+      ),
+    );
+};
+
+export const getProductsByCategory = async (req, res) => {
+  const { category } = req.params;
+
+  const products = await Product.find({ category: category }).select(
+    'name image description price',
+  );
+
+  return res
+    .status(StatusCodes.OK)
+    .json(
+      new ApiResponse(
+        StatusCodes.OK,
+        products,
+        'Products fetched successfully',
+      ),
+    );
+};
+
+export const toggleFeaturedProduct = async (req, res) => {
+  const { id } = req.params;
+
+  const product = await Product.findById(id);
+  if (product) {
+    product.isFeatured = !product.isFeatured;
+    const updateProduct = await product.save();
+    await updateFeaturedProductsInRedis();
+    return res
+      .status(StatusCodes.OK)
+      .json(
+        new ApiResponse(
+          StatusCodes.OK,
+          updateProduct,
+          'Product updated successfully',
+        ),
+      );
+  }
+
+  return res
+    .status(StatusCodes.NOT_FOUND)
+    .json(new ApiError(StatusCodes.NOT_FOUND, null, 'Product not found'));
+};
+
+async function updateFeaturedProductsInRedis() {
+  try {
+    const featuredProducts = await Product.find({ isFeatured: true }).lean();
+
+    await client.set('featured-products', JSON.stringify(featuredProducts));
+  } catch (error) {
+    console.log(error);
+  }
+}
