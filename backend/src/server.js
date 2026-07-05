@@ -18,6 +18,7 @@ const app = express();
 
 import { router as authRouter } from './routes/auth.route.js';
 import { router as productRouter } from './routes/product.route.js ';
+import {router as cartRouter} from './routes/cart.route.js'
 
 // Middleware
 app.use(express.json());
@@ -28,6 +29,7 @@ app.use(morgan('dev'));
 // Routes
 app.use('/api/v1/auth', authRouter);
 app.use('/api/v1/product', productRouter);
+app.use('/api/v1/cart',cartRouter)
 
 // Error Middlewares
 app.use(notFound);

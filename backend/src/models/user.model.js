@@ -23,15 +23,19 @@ const userSchema = new Schema(
       minLength: 6,
     },
 
-    cartItems: [
-      {
-        quantity: {
-          type: Number,
-          default: 0,
-        },
-      },
-    ],
-
+ cartItems: [
+  {
+    product: {
+      type: Schema.Types.ObjectId,
+      ref: 'Product',
+      required: true,
+    },
+    quantity: {
+      type: Number,
+      default: 1,
+    },
+  },
+],
     product: {
       type: Schema.Types.ObjectId,
       ref: 'Product',
