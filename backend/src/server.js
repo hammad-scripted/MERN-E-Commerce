@@ -21,7 +21,7 @@ import { router as productRouter } from './routes/product.route.js ';
 import { router as cartRouter } from './routes/cart.route.js';
 import { router as couponRouter } from './routes/coupon.route.js';
 import { router as paymentRouter } from './routes/coupon.route.js';
-import {rouer as orderRouter} from './routes/order.route.js';
+
 
 // Middleware
 app.use(express.json());
@@ -35,7 +35,7 @@ app.use('/api/v1/product', productRouter);
 app.use('/api/v1/cart', cartRouter);
 app.use('/api/v1/coupon', couponRouter);
 app.use('/api/v1/payment', paymentRouter);
-app.use('/api/v1/order', orderRouter);
+
 
 // Error Middlewares
 app.use(notFound);
