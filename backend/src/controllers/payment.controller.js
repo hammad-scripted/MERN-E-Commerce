@@ -6,7 +6,7 @@ import ApiError from '../utils/apiError.js';
 import ApiResponse from '../utils/apiResponse.js';
 import { Coupon } from '../models/coupon.model.js';
 import { stripe } from '../lib/stripe.js';
-
+import {Order} from '../models/order.model.js';
 export const createCheckoutSession = async (req, res, next) => {
   const { products, couponCode } = req.body;
 
@@ -113,3 +113,68 @@ async function createNewCoupon(userId) {
     isActive: true,
   });
 }
+
+export const createSuccessSession = async (req, res, next) => {
+  const { sessionId } = req.body;
+
+  const session = await stripe.checkout.sessions.retrieve(sessionId);
+
+  if (!session) {
+    return next(
+      new ApiError(StatusCodes.NOT_FOUND, 'Checkout session not found')
+    );
+  }
+
+  if (session.payment_status !== 'paid') {
+    return next(
+      new ApiError(StatusCodes.BAD_REQUEST, 'Payment not completed')
+    );
+  }
+
+  const existingOrder = await Order.findOne({
+    stripeSessionId: session.id,
+  });
+
+  if (existingOrder) {
+    return res.status(StatusCodes.OK).json(
+      new ApiResponse(
+        true,
+        existingOrder,
+        'Order already exists'
+      )
+    );
+  }
+
+  if (session.metadata.couponCode) {
+    await Coupon.findOneAndUpdate(
+      {
+        code: session.metadata.couponCode,
+        userId: session.metadata.userId,
+      },
+      {
+        isActive: false,
+      }
+    );
+  }
+
+  const products = JSON.parse(session.metadata.products);
+
+  const newOrder = await Order.create({
+    user: session.metadata.userId,
+    products: products.map((product) => ({
+      product: product.id,
+      quantity: product.quantity,
+      price: product.price,
+    })),
+    totalAmount: session.amount_total / 100,
+    stripeSessionId: session.id,
+  });
+
+  return res.status(StatusCodes.OK).json(
+    new ApiResponse(
+      true,
+      newOrder,
+      'Payment successful, order created and coupon deactivated if any'
+    )
+  );
+};
