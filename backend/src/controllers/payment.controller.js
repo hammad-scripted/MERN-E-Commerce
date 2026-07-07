@@ -11,9 +11,7 @@ export const createCheckoutSession = async (req, res, next) => {
   const { products, couponCode } = req.body;
 
   if (!Array.isArray(products) || products.length === 0) {
-    return next(
-      new ApiError(StatusCodes.BAD_REQUEST, 'Invalid products')
-    );
+    return next(new ApiError(StatusCodes.BAD_REQUEST, 'Invalid products'));
   }
 
   let totalAmount = 0;
@@ -46,13 +44,11 @@ export const createCheckoutSession = async (req, res, next) => {
     });
 
     if (!coupon) {
-      return next(
-        new ApiError(StatusCodes.BAD_REQUEST, 'Invalid coupon code')
-      );
+      return next(new ApiError(StatusCodes.BAD_REQUEST, 'Invalid coupon code'));
     }
 
     totalAmount = Math.round(
-      totalAmount * (1 - coupon.discountPercentage / 100)
+      totalAmount * (1 - coupon.discountPercentage / 100),
     );
   }
 
@@ -65,15 +61,21 @@ export const createCheckoutSession = async (req, res, next) => {
     discounts: coupon
       ? [
           {
-            coupon: await createStripeCoupon(
-              coupon.discountPercentage
-            ),
+            coupon: await createStripeCoupon(coupon.discountPercentage),
           },
         ]
       : [],
     metadata: {
       userId: req.user._id.toString(),
       couponCode: couponCode || '',
+      products: JSON.stringify(
+        products.map((product) => ({
+          name: product.name,
+          quantity: product.quantity,
+          price: product.price,
+          id: product._id,
+        })),
+      ),
     },
   });
 
@@ -88,8 +90,8 @@ export const createCheckoutSession = async (req, res, next) => {
         id: session.id,
         totalAmount: totalAmount / 100,
       },
-      'Checkout session created successfully'
-    )
+      'Checkout session created successfully',
+    ),
   );
 };
 
