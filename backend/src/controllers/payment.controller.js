@@ -73,7 +73,8 @@ export const createCheckoutSession = async (req, res, next) => {
           name: product.name,
           quantity: product.quantity,
           price: product.price,
-          id: product._id,
+          id: product._id.toString(),
+         
         })),
       ),
     },

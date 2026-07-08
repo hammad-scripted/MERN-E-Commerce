@@ -7,6 +7,7 @@ const orderSchema = new Schema(
       ref: 'User',
       required: true,
     },
+
     products: [
       {
         product: {
@@ -14,11 +15,13 @@ const orderSchema = new Schema(
           ref: 'Product',
           required: true,
         },
+
         quantity: {
           type: Number,
           required: true,
           min: 1,
         },
+
         price: {
           type: Number,
           required: true,
@@ -26,19 +29,22 @@ const orderSchema = new Schema(
         },
       },
     ],
+
     totalAmount: {
       type: Number,
       required: true,
       min: 0,
     },
+
     stripeSessionId: {
       type: String,
+      required: true,
       unique: true,
     },
   },
   {
     timestamps: true,
-  },
+  }
 );
 
-export const Order = model('Order', orderSchema);
+export const Order = model('Order', orderSchema);`
