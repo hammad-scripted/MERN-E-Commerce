@@ -20,6 +20,7 @@ router.get('/', protectRoute, adminRoute, async (req, res) => {
   res
     .status(StatusCodes.OK)
     .json(
-      new ApiResponse(true, analyticsData, 'Analytics fetched successfully'),
+      new ApiResponse(true, {analyticsData, dailySalesData}, 'Analytics fetched successfully'),
     );
 });
+
