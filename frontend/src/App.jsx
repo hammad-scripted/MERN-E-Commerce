@@ -1,9 +1,14 @@
+import { Route, Routes } from 'react-router-dom';
+import { HomePage } from './pages/HomePage';
+import { SignupPage } from './pages/SignupPage';
+import { LoginPage } from './pages/LoginPage';
 
-
-const App = () => {
+export const App = () => {
   return (
-    <div className='text-3xl text-pink-400 font-bold'>App</div>
-  )
-}
-
-export default App
+    <Routes>
+      <Route path="/" element={<HomePage />}></Route>
+      <Route path="/login" element={<LoginPage />}></Route>
+      <Route path="/signup" element={<SignupPage />}></Route>
+    </Routes>
+  );
+};
