@@ -47,4 +47,4 @@ const orderSchema = new Schema(
   }
 );
 
-export const Order = model('Order', orderSchema);`
+export const Order = model('Order', orderSchema);
