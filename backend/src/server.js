@@ -7,6 +7,7 @@ import cookieParser from 'cookie-parser';
 import express from 'express';
 import chalk from 'chalk';
 import morgan from 'morgan';
+import cors from 'cors';
 
 import errorHandler from './errors/errorHandler.js';
 import notFound from './errors/notFound.js';
@@ -21,25 +22,32 @@ import { router as productRouter } from './routes/product.route.js ';
 import { router as cartRouter } from './routes/cart.route.js';
 import { router as couponRouter } from './routes/coupon.route.js';
 import { router as paymentRouter } from './routes/coupon.route.js';
-import {router as analyticsRouter} from './routes/analytics.route.js';
+import { router as analyticsRouter } from './routes/analytics.route.js';
 
-
-// Middleware
+//! Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(morgan('dev'));
+app.use(
+  cors({
+    origin: '*',
+    credentials: true,
+    optionsSuccessStatus: 200,
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+  }),
+);
 
-// Routes
+//! Routes
 app.use('/api/v1/auth', authRouter);
 app.use('/api/v1/product', productRouter);
 app.use('/api/v1/cart', cartRouter);
 app.use('/api/v1/coupon', couponRouter);
 app.use('/api/v1/payment', paymentRouter);
-app.use("/api/v1/analytics",analyticsRouter);
+app.use('/api/v1/analytics', analyticsRouter);
 
-
-// Error Middlewares
+//! Error Middlewares
 app.use(notFound);
 app.use(errorHandler);
 
