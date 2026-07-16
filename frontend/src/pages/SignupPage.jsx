@@ -16,6 +16,7 @@ export const SignupPage = () => {
 const loading=false;
   const handleSubmit = (e) => {
     e.preventDefault();
+    console.log(formData);
     // signup(formData);
   };
 
