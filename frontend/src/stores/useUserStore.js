@@ -10,12 +10,12 @@ export const useUserStore = create((set, get) => ({
 
   //? actions
   signup: async ({ name, email, password, confirmPassword }) => {
-    set({ loading: true });
-    if (password != confirmPassword)
+    if (password !== confirmPassword) {
       return toast.error('Passwords do not match');
-
+    }
+    set({ loading: true });
     try {
-      const res = await axiosInstance.post('/auth/signup', {
+      const res = await axiosInstance.post('auth/signup', {
         name,
         email,
         password,
@@ -23,7 +23,7 @@ export const useUserStore = create((set, get) => ({
       set({ user: res.data.user, loading: false });
     } catch (error) {
       set({ loading: false });
-      toast.error(error.response.data.message);
+      toast.error(error.response?.data?.message || 'Signup failed');
     }
-  },
+},
 }));

@@ -18,7 +18,7 @@ const PORT = process.env.PORT || 5000;
 const app = express();
 
 import { router as authRouter } from './routes/auth.route.js';
-import { router as productRouter } from './routes/product.route.js ';
+import { router as productRouter } from './routes/product.route.js';
 import { router as cartRouter } from './routes/cart.route.js';
 import { router as couponRouter } from './routes/coupon.route.js';
 import { router as paymentRouter } from './routes/coupon.route.js';
