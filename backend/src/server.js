@@ -31,12 +31,12 @@ app.use(cookieParser());
 app.use(morgan('dev'));
 app.use(
   cors({
-    origin: '*',
-    credentials: true,
-    optionsSuccessStatus: 200,
-    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
-  }),
+  origin: process.env.CLIENT_URL, // "http://localhost:5173"
+  credentials: true,
+  optionsSuccessStatus: 200,
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+})
 );
 
 //! Routes
