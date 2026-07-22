@@ -2,6 +2,7 @@ import { validationResult } from 'express-validator';
 import { StatusCodes } from 'http-status-codes';
 import ApiError from '../utils/apiError.js';
 
+
 export const validate = (req, res, next) => {
   const errors = validationResult(req);
 

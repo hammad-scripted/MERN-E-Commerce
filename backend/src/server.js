@@ -25,8 +25,8 @@ import { router as paymentRouter } from './routes/coupon.route.js';
 import { router as analyticsRouter } from './routes/analytics.route.js';
 
 //! Middleware
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json({ limit: '10mb' })); // default is 100kb
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use(cookieParser());
 app.use(morgan('dev'));
 app.use(
