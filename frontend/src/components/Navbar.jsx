@@ -5,6 +5,7 @@ import { useUserStore } from '../stores/useUserStore';
 
 export const Navbar = () => {
   const { user, logout } = useUserStore();
+  console.log(user)
   // const isAdmin = user?.role === "admin";
   // const { cart } = useCartStore();
 

@@ -62,4 +62,5 @@ export const useUserStore = create((set, get) => ({
       toast.error(error.response?.data?.message || 'Logout failed');
     }
   },
+  //todo implement the axios interceptors for refreshing
 }));
