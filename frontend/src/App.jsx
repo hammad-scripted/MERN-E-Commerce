@@ -5,6 +5,7 @@ import { LoginPage } from './pages/LoginPage';
 import { Navbar } from './components/Navbar';
 import { Toaster } from 'react-hot-toast';
 import { useUserStore } from './stores/useUserStore';
+import { AdminPage } from './pages/AdminPage.jsx';
 
 import { LoadingSpinner } from './components/LoadingSpinner.jsx';
 import { useEffect } from 'react';
@@ -34,6 +35,16 @@ export const App = () => {
           <Route
             path="/signup"
             element={!user ? <SignupPage /> : <Navigate to="/" />}
+          ></Route>
+          <Route
+            path="/secret-dashboard"
+            element={
+              user?.role === 'admin' ? (
+                <AdminPage/>
+              ) : (
+                <Navigate to="/login" />
+              )
+            }
           ></Route>
         </Routes>
       </div>
