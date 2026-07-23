@@ -22,4 +22,16 @@ export const useProductStore = create((set, get) => ({
       toast.error(error.response?.data?.message || 'Product creation failed');
     }
   },
+  deleteProduct: async () => {},
+  fetchAllProducts: async () => {
+    set({ loading: true });
+    try {
+      const res = await axiosInstance.get('/product');
+      set({ products: res.data.data, loading: false });
+    } catch (error) {
+      set({ loading: false });
+      toast.error(error.response?.data?.message || 'Product creation failed');
+    }
+  },
+  toggleFeaturedProduct: async () => {},
 }));
