@@ -25,8 +25,15 @@ export const useProductStore = create((set, get) => ({
   deleteProduct: async (productId) => {
     try {
       const res = await axiosInstance.delete(`/product/${productId}`);
+      set((previousProducts) => ({
+        products: previousProducts.products.filter(
+          (product) => product._id !== productId,
+        ),
+        loading: false,
+      }));
       toast.success(res.data.message);
     } catch (error) {
+      set({ loading: false });
       toast.error(error.response?.data?.message || 'Product deletion failed');
     }
   },
@@ -41,8 +48,18 @@ export const useProductStore = create((set, get) => ({
     }
   },
   toggleFeaturedProduct: async (productId) => {
+    set({ loading: true });
     try {
       const res = await axiosInstance.patch(`/product/${productId}`);
+      set((previousProducts) => ({
+        products: previousProducts.products.map((product) => {
+          if (product._id === productId) {
+            return { ...product, isFeatured: res.data.data.isFeatured };
+          }
+          return product;
+        }),
+        loading: false,
+      }));
       toast.success(res.data.message);
     } catch (error) {
       toast.error(error.response?.data?.message || 'Product creation failed');
