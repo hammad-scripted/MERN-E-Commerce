@@ -22,7 +22,14 @@ export const useProductStore = create((set, get) => ({
       toast.error(error.response?.data?.message || 'Product creation failed');
     }
   },
-  deleteProduct: async () => {},
+  deleteProduct: async (productId) => {
+    try {
+      const res = await axiosInstance.delete(`/product/${productId}`);
+      toast.success(res.data.message);
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Product deletion failed');
+    }
+  },
   fetchAllProducts: async () => {
     set({ loading: true });
     try {
@@ -33,5 +40,12 @@ export const useProductStore = create((set, get) => ({
       toast.error(error.response?.data?.message || 'Product creation failed');
     }
   },
-  toggleFeaturedProduct: async () => {},
+  toggleFeaturedProduct: async (productId) => {
+    try {
+      const res = await axiosInstance.patch(`/product/${productId}`);
+      toast.success(res.data.message);
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Product creation failed');
+    }
+  },
 }));
