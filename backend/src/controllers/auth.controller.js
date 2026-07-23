@@ -2,161 +2,196 @@ import ApiError from '../utils/apiError.js';
 import ApiResponse from '../utils/apiResponse.js';
 import { StatusCodes } from 'http-status-codes';
 import { User } from '../models/user.model.js';
-import { generateTokens } from '../utils/token.js';
-import { generateAccessToken } from '../utils/token.js';
-import { generateRefreshToken } from '../utils/token.js';
-import { storeRefreshToken } from '../utils/token.js';
-import { verifyAccessToken, verifyRefreshToken } from '../utils/token.js';
+import {
+  generateTokens,
+  generateAccessToken,
+  storeRefreshToken,
+  verifyRefreshToken,
+} from '../utils/token.js';
 import client from '../lib/redis.js';
-
 import { setCookies } from '../lib/cookie.js';
+
 export const signup = async (req, res, next) => {
-  const { email, password, name } = req.body;
+  try {
+    const { email, password, name } = req.body;
 
-  const existingUser = await User.findOne({ email });
+    const existingUser = await User.findOne({ email });
 
-  if (existingUser) {
-    return next(new ApiError(StatusCodes.BAD_REQUEST, 'User already exists'));
-  }
-  const user = await User.create({
-    name,
-    email,
-    password,
-  });
+    if (existingUser) {
+      return next(
+        new ApiError(StatusCodes.BAD_REQUEST, 'User already exists')
+      );
+    }
 
-  //! Generate JWT token
-  const { accessToken, refreshToken } = generateTokens(user._id);
+    const user = await User.create({
+      name,
+      email,
+      password,
+    });
 
-  //! Store refresh token in Redis
-  await storeRefreshToken(`refreshToken-${user._id}`, refreshToken);
+    const { accessToken, refreshToken } = generateTokens(user._id);
 
-  // ! set cookies
-  setCookies(res, accessToken, refreshToken);
+    await storeRefreshToken(`refreshToken-${user._id}`, refreshToken);
 
-  const userWithoutPassword = await User.findById(user._id).select('-password');
+    setCookies(res, accessToken, refreshToken);
 
-  return res
-    .status(StatusCodes.CREATED)
-    .json(
+    const userWithoutPassword = await User.findById(user._id).select(
+      '-password'
+    );
+
+    return res.status(StatusCodes.CREATED).json(
       new ApiResponse(
         StatusCodes.CREATED,
         userWithoutPassword,
-        'User created successfully',
-      ),
+        'User created successfully'
+      )
     );
+  } catch (error) {
+    next(error);
+  }
 };
 
 export const login = async (req, res, next) => {
-  const { email, password } = req.body;
+  try {
+    const { email, password } = req.body;
 
-  if (!email || !password) {
-    return res
-      .status(StatusCodes.BAD_REQUEST)
-      .json(
+    if (!email || !password) {
+      return next(
         new ApiError(
           StatusCodes.BAD_REQUEST,
-          null,
-          'Email and password are required',
-        ),
+          'Email and password are required'
+        )
       );
-  }
+    }
 
-  const user = await User.findOne({ email });
+    const user = await User.findOne({ email });
 
-  if (!user) {
-    return res
-      .status(StatusCodes.BAD_REQUEST)
-      .json(new ApiError(StatusCodes.BAD_REQUEST, null, 'User does not exist'));
-  }
+    if (!user) {
+      return next(
+        new ApiError(StatusCodes.BAD_REQUEST, 'User does not exist')
+      );
+    }
 
-  const isPasswordMatch = await user.comparePassword(password);
+    const isPasswordMatch = await user.comparePassword(password);
 
-  if (!isPasswordMatch) {
-    return res
-      .status(StatusCodes.BAD_REQUEST)
-      .json(new ApiError(StatusCodes.BAD_REQUEST, null, 'Invalid password'));
-  }
+    if (!isPasswordMatch) {
+      return next(
+        new ApiError(StatusCodes.BAD_REQUEST, 'Invalid password')
+      );
+    }
 
-  //! Generate JWT token
-  const { accessToken, refreshToken } = generateTokens(user._id);
+    const { accessToken, refreshToken } = generateTokens(user._id);
 
-  //! Store refresh token in Redis
-  await storeRefreshToken(`refreshToken-${user._id}`, refreshToken);
+    await storeRefreshToken(`refreshToken-${user._id}`, refreshToken);
 
-  // ! set cookies
-  setCookies(res, accessToken, refreshToken);
+    setCookies(res, accessToken, refreshToken);
 
-  const userWithoutPassword = await User.findById(user._id).select('-password');
-  return res
-    .status(StatusCodes.OK)
-    .json(
+    const userWithoutPassword = await User.findById(user._id).select(
+      '-password'
+    );
+
+    return res.status(StatusCodes.OK).json(
       new ApiResponse(
         StatusCodes.OK,
         userWithoutPassword,
-        'User logged in successfully',
-      ),
+        'User logged in successfully'
+      )
     );
+  } catch (error) {
+    next(error);
+  }
 };
 
 export const logout = async (req, res, next) => {
-  const refreshToken = req.cookies.refreshToken;
-  if (refreshToken) {
-    const decodedToken = verifyRefreshToken(refreshToken);
-    await client.del(`refreshToken-${decodedToken.userId}`);
-  }
+  try {
+    const refreshToken = req.cookies.refreshToken;
 
-  res.clearCookie('accessToken');
-  res.clearCookie('refreshToken');
+    if (refreshToken) {
+      const decodedToken = verifyRefreshToken(refreshToken);
+      await client.del(`refreshToken-${decodedToken.userId}`);
+    }
 
-  return res
-    .status(StatusCodes.OK)
-    .json(
-      new ApiResponse(StatusCodes.OK, null, 'User logged out successfully'),
+    res.clearCookie('accessToken');
+    res.clearCookie('refreshToken');
+
+    return res.status(StatusCodes.OK).json(
+      new ApiResponse(
+        StatusCodes.OK,
+        null,
+        'User logged out successfully'
+      )
     );
+  } catch (error) {
+    next(error);
+  }
 };
 
 export const refreshToken = async (req, res, next) => {
-  const refreshToken = req.cookies.refreshToken;
+  try {
+    const refreshToken = req.cookies.refreshToken;
 
-  if (!refreshToken) {
-    return res
-      .status(StatusCodes.UNAUTHORIZED)
-      .json(new ApiError(StatusCodes.UNAUTHORIZED, null, 'Unauthorized:You need to login first!'));
-  }
+    if (!refreshToken) {
+      return next(
+        new ApiError(
+          StatusCodes.UNAUTHORIZED,
+          'You need to login first'
+        )
+      );
+    }
 
-  const decodedToken = verifyRefreshToken(refreshToken);
-  const storedToken = await client.get(`refreshToken-${decodedToken.userId}`);
+    const decodedToken = verifyRefreshToken(refreshToken);
 
-  if (!storedToken || storedToken !== refreshToken) {
-    return res
-      .status(StatusCodes.UNAUTHORIZED)
-      .json(new ApiError(StatusCodes.UNAUTHORIZED, null, 'Unauthorized:Token is not valid'));
-  }
-
-  const accessToken = generateAccessToken(decodedToken.userId);
-  const user = await User.findById(decodedToken.userId).select('-password');
-  setCookies(res, accessToken, refreshToken);
-  return res
-    .status(StatusCodes.OK)
-    .json(
-      new ApiResponse(StatusCodes.OK, user, 'Token refreshed successfully'),
+    const storedToken = await client.get(
+      `refreshToken-${decodedToken.userId}`
     );
-};
 
-export const getProfile = async (req, res, next) => {
-  const user = await User.findById(req.user._id).select('-password');
-  if (!user) {
-    return res
-      .status(StatusCodes.NOT_FOUND)
-      .json(new ApiError(StatusCodes.NOT_FOUND, null, 'User not found'));
-  }
-  return res
-    .status(StatusCodes.OK)
-    .json(
+    if (!storedToken || storedToken !== refreshToken) {
+      return next(
+        new ApiError(
+          StatusCodes.UNAUTHORIZED,
+          'Invalid or expired refresh token'
+        )
+      );
+    }
+
+    const accessToken = generateAccessToken(decodedToken.userId);
+
+    const user = await User.findById(decodedToken.userId).select(
+      '-password'
+    );
+
+    setCookies(res, accessToken, refreshToken);
+
+    return res.status(StatusCodes.OK).json(
       new ApiResponse(
         StatusCodes.OK,
         user,
-        'User profile fetched successfully',
-      ),
+        'Token refreshed successfully'
+      )
     );
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getProfile = async (req, res, next) => {
+  try {
+    const user = await User.findById(req.user._id).select('-password');
+
+    if (!user) {
+      return next(
+        new ApiError(StatusCodes.NOT_FOUND, 'User not found')
+      );
+    }
+
+    return res.status(StatusCodes.OK).json(
+      new ApiResponse(
+        StatusCodes.OK,
+        user,
+        'User profile fetched successfully'
+      )
+    );
+  } catch (error) {
+    next(error);
+  }
 };
