@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import axiosInstance from '../lib/axios';
 import { toast } from 'react-hot-toast';
-
+import { getErrorMessage } from '../lib/getErrorMessage';
 export const useUserStore = create((set, get) => ({
   // ? states
   user: null,
@@ -25,7 +25,7 @@ export const useUserStore = create((set, get) => ({
       toast.success('Account created successfully');
     } catch (error) {
       set({ loading: false });
-      toast.error(error.response?.data?.message || 'Signup failed');
+      toast.error(getErrorMessage(error));
     }
   },
 
@@ -37,7 +37,7 @@ export const useUserStore = create((set, get) => ({
       toast.success('Logged in successfully');
     } catch (error) {
       set({ loading: false });
-      toast.error(error.response?.data?.message || 'Login failed');
+      toast.error(getErrorMessage(error));
     }
   },
 
@@ -59,7 +59,7 @@ export const useUserStore = create((set, get) => ({
       set({ user: null });
       toast.success('Logged out successfully');
     } catch (error) {
-      toast.error(error.response?.data?.message || 'Logout failed');
+      toast.error(getErrorMessage(error));
     }
   },
   //todo implement the axios interceptors for refreshing
