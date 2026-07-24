@@ -18,7 +18,7 @@ export const router = Router();
 router.get('/', protectRoute, adminRoute, getAllProducts);
 router.get('/featured', getFeaturedProducts);
 router.get('/recommended', protectRoute, getRecommendedProducts);
-router.get('/category/:category', protectRoute, getProductsByCategory);
+router.get('/category/:category',  getProductsByCategory);
 router.post(
   '/',
   protectRoute,
