@@ -1,5 +1,5 @@
 
-// import { useProductStore } from "../stores/useProductStore";
+import { useProductStore } from "../stores/useProductStore";
 // import {FeaturedProducts} from "../components/FeaturedProducts";
 import { CategoryItem } from './../components/CategoryItem';
 
@@ -12,6 +12,7 @@ const categories = [
 	{ href: "/suits", name: "Suits", imageUrl: "/suits.jpg" },
 	{ href: "/bags", name: "Bags", imageUrl: "/bags.jpg" },
 ];
+import { useEffect } from 'react';
 
 export const HomePage = () => {
 	// const { fetchFeaturedProducts, products, loading } = useProductStore();
