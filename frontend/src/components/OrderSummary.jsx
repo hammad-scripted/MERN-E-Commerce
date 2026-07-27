@@ -3,10 +3,10 @@ import { useCartStore } from "../stores/useCartStore";
 import { Link } from "react-router-dom";
 import { MoveRight } from "lucide-react";
 import { loadStripe } from "@stripe/stripe-js";
-import axios from "../lib/axios";
+import axiosInstance from "../lib/axios";
 
 const stripePromise = loadStripe(
-    "pk_test_51KZYccCoOZF2UhtOwdXQl3vcizup20zqKqT9hVUIsVzsdBrhqbUI2fE0ZdEVLdZfeHjeyFXtqaNsyCJCmZWnjNZa00PzMAjlcL"
+   'pk_test_51TxhsVJmpRd6aPVRbxn24Catz9TVrfurEf6nMQc11t0vcXch9JCZ0d3rE9ZSTHJtaprEAa0DXWVnKZ3sws9Sh4ON00xPkCn8AI'
 );
 
 const OrderSummary = () => {
@@ -19,12 +19,12 @@ const OrderSummary = () => {
 
     const handlePayment = async () => {
         const stripe = await stripePromise;
-        const res = await axios.post("/payments/create-checkout-session", {
+        const res = await axiosInstance.post("/payment/create-checkout-session", {
             products: cart,
             couponCode: coupon ? coupon.code : null,
         });
 
-        const session = res.data;
+        const session = res.data.data;
         const result = await stripe.redirectToCheckout({
             sessionId: session.id,
         });

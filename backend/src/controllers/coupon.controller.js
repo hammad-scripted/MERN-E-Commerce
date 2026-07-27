@@ -3,7 +3,7 @@ import ApiError from '../utils/apiError.js';
 import ApiResponse from '../utils/apiResponse.js';
 import { StatusCodes } from 'http-status-codes';
 
-export const getCoupon = async (req, res) => {
+export const getCoupon = async (req, res,next) => {
   const coupon = await Coupon.findOne({
     userId: req.user._id,
     isActive: true,
@@ -30,7 +30,7 @@ export const getCoupon = async (req, res) => {
     );
 };
 
-export const validateCoupon = async (req, res) => {
+export const validateCoupon = async (req, res,next) => {
   const { code } = req.body;
 
   const coupon = await Coupon.findOne({

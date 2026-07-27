@@ -11,6 +11,7 @@ import LoadingSpinner from './components/LoadingSpinner.jsx';
 import { useEffect } from 'react';
 import { CategoryPage } from './pages/CategoryPage.jsx';
 import { useCartStore } from './stores/useCartStore.js';
+import PurchaseSuccess from './pages/PurchaseSuccess.jsx';
 export const App = () => {
   const { user, checkAuth, checkingAuth } = useUserStore();
   const { getCartItems } = useCartStore();
@@ -19,8 +20,11 @@ export const App = () => {
     checkAuth();
   }, [checkAuth]);
   useEffect(() => {
+    if (!user) {
+      return;
+    }
     getCartItems();
-  }, [getCartItems]);
+  }, [getCartItems, user]);
   if (checkingAuth) return <LoadingSpinner />;
   return (
     <div className="min-h-screen bg-gray-900 text-white relative overflow-hidden">
@@ -53,6 +57,11 @@ export const App = () => {
           <Route
             path="/cart"
             element={user ? <CartPage /> : <Navigate to="/login" />}
+          ></Route>
+
+          <Route
+            path="purchase-success"
+            element={user ? <PurchaseSuccess /> : <Navigate to="/login" />}
           ></Route>
         </Routes>
       </div>
