@@ -6,7 +6,7 @@ import {
   getAnalyticsData,
   getDailySalesData,
 } from '../controllers/analytics.controller.js';
-
+import { StatusCodes } from 'http-status-codes';
 import ApiResponse from '../utils/apiResponse.js';
 import ApiError from '../utils/apiError.js';
 export const router = Router();
