@@ -4,6 +4,7 @@ import ApiResponse from '../utils/apiResponse.js';
 import { StatusCodes } from 'http-status-codes';
 import client from '../lib/redis.js';
 import cloudinary from './../lib/cloudinary.js';
+
 export const getAllProducts = async (req, res, next) => {
   const products = await Product.find({});
   return res
@@ -19,7 +20,7 @@ export const getAllProducts = async (req, res, next) => {
 
 export const getFeaturedProducts = async (req, res, next) => {
   // ? check in redis first
-  let featuredProducts = await redis.get('featured-products');
+  let featuredProducts = await client.get('featured-products');
 
   if (featuredProducts) {
     return res
@@ -40,7 +41,7 @@ export const getFeaturedProducts = async (req, res, next) => {
   featuredProducts = await Product.find({ isFeatured: true }).lean();
 
   // ? update in the redis
-  await redis.set('featured-products', JSON.stringify(featuredProducts));
+  await client.set('featured-products', JSON.stringify(featuredProducts));
   return res
     .status(StatusCodes.OK)
     .json(
