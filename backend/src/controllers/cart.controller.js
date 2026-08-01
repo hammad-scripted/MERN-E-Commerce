@@ -15,7 +15,6 @@ export const addToCart = async (req, res, next) => {
     return next(
       new ApiError(
         StatusCodes.NOT_FOUND,
-        null,
         'Product not found'
       )
     );
@@ -38,10 +37,9 @@ export const addToCart = async (req, res, next) => {
 
   return res.status(StatusCodes.OK).json(
     new ApiResponse(
-      true,
       StatusCodes.OK,
-      'Product added to cart',
-      user.cartItems
+      user.cartItems,
+      'Product added to cart'
     )
   );
 };
@@ -63,10 +61,9 @@ export const removeAllFromCart = async (req, res, next) => {
 
   return res.status(StatusCodes.OK).json(
     new ApiResponse(
-      true,
       StatusCodes.OK,
-      'Product removed from cart',
-      user.cartItems
+      user.cartItems,
+      'Product removed from cart'
     )
   );
 };
@@ -85,7 +82,6 @@ export const updateQuantity = async (req, res, next) => {
     return next(
       new ApiError(
         StatusCodes.NOT_FOUND,
-        null,
         'Product not found in cart'
       )
     );
@@ -100,10 +96,9 @@ export const updateQuantity = async (req, res, next) => {
 
     return res.status(StatusCodes.OK).json(
       new ApiResponse(
-        true,
         StatusCodes.OK,
-        'Product removed from cart',
-        user.cartItems
+        user.cartItems,
+        'Product removed from cart'
       )
     );
   }
@@ -114,10 +109,9 @@ export const updateQuantity = async (req, res, next) => {
 
   return res.status(StatusCodes.OK).json(
     new ApiResponse(
-      true,
       StatusCodes.OK,
-      'Product quantity updated',
-      user.cartItems
+      user.cartItems,
+      'Product quantity updated'
     )
   );
 };
@@ -144,10 +138,9 @@ export const getCartProducts = async (req, res, next) => {
 
   return res.status(StatusCodes.OK).json(
     new ApiResponse(
-      true,
       StatusCodes.OK,
-      'Cart fetched successfully',
-      cartItems
+      cartItems,
+      'Cart fetched successfully'
     )
   );
 };

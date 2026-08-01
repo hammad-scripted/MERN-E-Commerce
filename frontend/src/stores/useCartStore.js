@@ -76,6 +76,7 @@ export const useCartStore = create((set, get) => ({
     get().calculateTotals();
   },
   updateQuantity: async (productId, quantity) => {
+    if (quantity < 0) return; // prevent 0/negative quantity
     await axiosInstance.put(`/cart/${productId}`, { productId, quantity });
     toast.success('Quantity updated successfully!');
     set((prevState) => ({
