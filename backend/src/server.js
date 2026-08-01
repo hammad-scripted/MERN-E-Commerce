@@ -71,7 +71,7 @@ app.use(errorHandler);
 if (hasFrontendBuild && frontendDistPath && frontendIndexPath) {
   app.use(express.static(frontendDistPath));
 
-  app.get('*', (req, res, next) => {
+  app.use((req, res, next) => {
     if (req.path.startsWith('/api/')) {
       return next();
     }
