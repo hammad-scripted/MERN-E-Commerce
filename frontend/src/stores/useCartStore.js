@@ -86,6 +86,17 @@ export const useCartStore = create((set, get) => ({
     }));
     get().calculateTotals();
   },
+  clearCart: async () => {
+
+    try{
+      set({ cart: [],coupon: null, isCouponApplied: false, total: 0, subtotal: 0 });
+    }
+    catch(error){
+      toast.error(error.response?.data?.errors || 'An error occurred while clearing the cart');  
+    }
+
+  }
+  ,
 
   calculateTotals: () => {
     const { cart, coupon } = get();

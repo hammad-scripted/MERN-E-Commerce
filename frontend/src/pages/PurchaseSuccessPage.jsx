@@ -6,9 +6,10 @@ import axiosInstance from "../lib/axios";
 import Confetti from "react-confetti";
 
 const PurchaseSuccessPage = () => {
-    const [isProcessing, setIsProcessing] = useState(true);
+    const sessionId = new URLSearchParams(window.location.search).get("session_id");
+    const [isProcessing, setIsProcessing] = useState(Boolean(sessionId));
     const { clearCart } = useCartStore();
-    const [error, setError] = useState(null);
+    const error = sessionId ? null : "No session ID found in the URL";
 
     useEffect(() => {
         const handleCheckoutSuccess = async (sessionId) => {
@@ -24,14 +25,10 @@ const PurchaseSuccessPage = () => {
             }
         };
 
-        const sessionId = new URLSearchParams(window.location.search).get("session_id");
         if (sessionId) {
             handleCheckoutSuccess(sessionId);
-        } else {
-            setIsProcessing(false);
-            setError("No session ID found in the URL");
         }
-    }, [clearCart]);
+    }, [clearCart, sessionId]);
 
     if (isProcessing) return "Processing...";
 

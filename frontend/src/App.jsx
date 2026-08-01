@@ -11,7 +11,9 @@ import LoadingSpinner from './components/LoadingSpinner.jsx';
 import { useEffect } from 'react';
 import { CategoryPage } from './pages/CategoryPage.jsx';
 import { useCartStore } from './stores/useCartStore.js';
-import PurchaseSuccess from './pages/PurchaseSuccess.jsx';
+import PurchaseSuccess from './pages/PurchaseSuccessPage.jsx';
+import PurchaseSuccessPage from './pages/PurchaseSuccessPage.jsx';
+import PurchaseCancelPage from './pages/PurchaseCancelPage';
 export const App = () => {
   const { user, checkAuth, checkingAuth } = useUserStore();
   const { getCartItems } = useCartStore();
@@ -61,8 +63,9 @@ export const App = () => {
 
           <Route
             path="/success"
-            element={user ? <PurchaseSuccess /> : <Navigate to="/login" />}
+            element={user ? <PurchaseSuccessPage /> : <Navigate to="/login" />}
           ></Route>
+          <Route path="/cancel" element={user?<PurchaseCancelPage />:<Navigate to="/login"/>}></Route>
         </Routes>
       </div>
       <Toaster />
