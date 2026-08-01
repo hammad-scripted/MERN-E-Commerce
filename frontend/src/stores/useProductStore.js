@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import axiosInstance from '../lib/axios';
 import toast from 'react-hot-toast';
 
-export const useProductStore = create((set, get) => ({
+export const useProductStore = create((set) => ({
   products: [],
   loading: false,
 
@@ -17,9 +17,11 @@ export const useProductStore = create((set, get) => ({
       }));
       set({ loading: false });
       toast.success('Product created successfully');
+      return true;
     } catch (error) {
       set({ loading: false });
       toast.error(error.response?.data?.errors || 'Product creation failed');
+      return false;
     }
   },
   deleteProduct: async (productId) => {

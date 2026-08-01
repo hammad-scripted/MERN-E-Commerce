@@ -3,7 +3,7 @@ import axiosInstance from '../lib/axios';
 import { toast } from 'react-hot-toast';
 import { getErrorMessage } from '../lib/getErrorMessage';
 
-export const useUserStore = create((set, get) => ({
+export const useUserStore = create((set) => ({
   // ? states
   user: null,
   loading: false,
@@ -47,7 +47,7 @@ export const useUserStore = create((set, get) => ({
     try {
       const res = await axiosInstance.get('auth/profile');
       set({ user: res.data.data, checkingAuth: false });
-    } catch (error) {
+    } catch {
       // expected when the user isn't logged in — fail silently, no toast
       set({ user: null, checkingAuth: false });
     }
@@ -90,11 +90,9 @@ axiosInstance.interceptors.response.use(
         refreshingToken = axiosInstance.post('auth/refresh-token');
       }
 
-      const res = await refreshingToken;
-      const accessToken = res.data.data.accessToken;
-
-      axiosInstance.defaults.headers.common['Authorization'] = `Bearer ${accessToken}`;
-      originalRequest.headers.Authorization = `Bearer ${accessToken}`;
+      // The backend renews HTTP-only cookies. There is no access token in the
+      // JSON response, and JavaScript should not attempt to manage one.
+      await refreshingToken;
 
       return axiosInstance(originalRequest);
     } catch {

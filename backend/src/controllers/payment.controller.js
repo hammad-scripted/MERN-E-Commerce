@@ -7,6 +7,8 @@ import ApiResponse from '../utils/apiResponse.js';
 import { Coupon } from '../models/coupon.model.js';
 import { stripe } from '../lib/stripe.js';
 import {Order} from '../models/order.model.js';
+import { Product } from '../models/product.model.js';
+import { isValidObjectId } from 'mongoose';
 export const createCheckoutSession = async (req, res, next) => {
   const { products, couponCode } = req.body;
   const frontendOrigin =
@@ -16,12 +18,42 @@ export const createCheckoutSession = async (req, res, next) => {
     return next(new ApiError(StatusCodes.BAD_REQUEST, 'Invalid products'));
   }
 
-  let originalAmount = 0;
+  const requestedProducts = products.map(({ _id, quantity }) => ({
+    productId: _id,
+    quantity: Number(quantity),
+  }));
 
-  const lineItems = products.map((product) => {
+  const hasInvalidProduct = requestedProducts.some(
+    ({ productId, quantity }) =>
+      !isValidObjectId(productId) || !Number.isInteger(quantity) || quantity < 1,
+  );
+
+  if (hasInvalidProduct) {
+    return next(new ApiError(StatusCodes.BAD_REQUEST, 'Invalid products'));
+  }
+
+  const productIds = requestedProducts.map(({ productId }) => productId);
+  const databaseProducts = await Product.find({ _id: { $in: productIds } }).lean();
+  const productsById = new Map(
+    databaseProducts.map((product) => [product._id.toString(), product]),
+  );
+
+  if (productsById.size !== new Set(productIds.map(String)).size) {
+    return next(new ApiError(StatusCodes.NOT_FOUND, 'One or more products no longer exist'));
+  }
+
+  // Prices, names, and images come from the database—not from editable
+  // browser data—so checkout amounts cannot be tampered with.
+  const orderProducts = requestedProducts.map(({ productId, quantity }) => {
+    const product = productsById.get(productId.toString());
+    return { product, quantity };
+  });
+
+  let originalAmount = 0;
+  const lineItems = orderProducts.map(({ product, quantity }) => {
     const amount = Math.round(product.price * 100);
 
-    originalAmount += amount * product.quantity;
+    originalAmount += amount * quantity;
 
     return {
       price_data: {
@@ -32,7 +64,7 @@ export const createCheckoutSession = async (req, res, next) => {
         },
         unit_amount: amount,
       },
-      quantity: product.quantity,
+      quantity,
     };
   });
 
@@ -74,9 +106,8 @@ export const createCheckoutSession = async (req, res, next) => {
       userId: req.user._id.toString(),
       couponCode: couponCode || '',
       products: JSON.stringify(
-        products.map((product) => ({
-          name: product.name,
-          quantity: product.quantity,
+        orderProducts.map(({ product, quantity }) => ({
+          quantity,
           price: product.price,
           id: product._id.toString(),
         })),
@@ -90,7 +121,7 @@ export const createCheckoutSession = async (req, res, next) => {
 
   return res.status(StatusCodes.OK).json(
     new ApiResponse(
-      true,
+      StatusCodes.OK,
       {
         id: session.id,
         url: session.url,
@@ -125,6 +156,10 @@ async function createNewCoupon(userId) {
 export const createSuccessSession = async (req, res, next) => {
   const { sessionId } = req.body;
 
+  if (!sessionId || typeof sessionId !== 'string') {
+    return next(new ApiError(StatusCodes.BAD_REQUEST, 'Invalid checkout session'));
+  }
+
   const session = await stripe.checkout.sessions.retrieve(sessionId);
 
   if (!session) {
@@ -139,6 +174,10 @@ export const createSuccessSession = async (req, res, next) => {
     );
   }
 
+  if (session.metadata.userId !== req.user._id.toString()) {
+    return next(new ApiError(StatusCodes.FORBIDDEN, 'Checkout session belongs to another user'));
+  }
+
   const existingOrder = await Order.findOne({
     stripeSessionId: session.id,
   });
@@ -146,7 +185,7 @@ export const createSuccessSession = async (req, res, next) => {
   if (existingOrder) {
     return res.status(StatusCodes.OK).json(
       new ApiResponse(
-        true,
+        StatusCodes.OK,
         existingOrder,
         'Order already exists'
       )
@@ -187,7 +226,7 @@ export const createSuccessSession = async (req, res, next) => {
 
   return res.status(StatusCodes.OK).json(
     new ApiResponse(
-      true,
+      StatusCodes.OK,
       newOrder,
       'Payment successful, order created and coupon deactivated if any'
     )

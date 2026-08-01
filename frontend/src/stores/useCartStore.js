@@ -75,23 +75,34 @@ export const useCartStore = create((set, get) => ({
   },
 
   removeFromCart: async (productId) => {
-    await axiosInstance.delete(`/cart`, { data: { productId } });
-    toast.success('Removed from cart successfully!');
-    set((prevState) => ({
-      cart: prevState.cart.filter((item) => item._id !== productId),
-    }));
-    get().calculateTotals();
+    try {
+      await axiosInstance.delete(`/cart`, { data: { productId } });
+      toast.success('Removed from cart successfully!');
+      set((prevState) => ({
+        cart: prevState.cart.filter((item) => item._id !== productId),
+      }));
+      get().calculateTotals();
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Unable to remove item');
+    }
   },
   updateQuantity: async (productId, quantity) => {
     if (quantity < 0) return; // prevent 0/negative quantity
-    await axiosInstance.put(`/cart/${productId}`, { productId, quantity });
-    toast.success('Quantity updated successfully!');
-    set((prevState) => ({
-      cart: prevState.cart.map((item) =>
-        item._id === productId ? { ...item, quantity } : item,
-      ),
-    }));
-    get().calculateTotals();
+    try {
+      await axiosInstance.put(`/cart/${productId}`, { productId, quantity });
+      toast.success('Quantity updated successfully!');
+      set((prevState) => ({
+        cart:
+          quantity === 0
+            ? prevState.cart.filter((item) => item._id !== productId)
+            : prevState.cart.map((item) =>
+                item._id === productId ? { ...item, quantity } : item,
+              ),
+      }));
+      get().calculateTotals();
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Unable to update quantity');
+    }
   },
   clearCart: async () => {
 

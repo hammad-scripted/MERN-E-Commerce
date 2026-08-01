@@ -98,25 +98,25 @@ export const deleteProduct = async (req, res, next) => {
 
   const product = await Product.findById(id);
   if (!product) {
-    return next(new ApiError(StatusCodes.NOT_FOUND, null, 'Product not found'));
+    return next(new ApiError(StatusCodes.NOT_FOUND, 'Product not found'));
   }
 
   if (product.image) {
     const publicId = product.image.split('/').pop().split('.')[0];
     await cloudinary.uploader.destroy(`products/${publicId}`);
-
-    await Product.findByIdAndDelete(id);
-
-    return res
-      .status(StatusCodes.OK)
-      .json(
-        new ApiResponse(
-          StatusCodes.OK,
-          product,
-          'Product deleted successfully',
-        ),
-      );
   }
+
+  await Product.findByIdAndDelete(id);
+
+  return res
+    .status(StatusCodes.OK)
+    .json(
+      new ApiResponse(
+        StatusCodes.OK,
+        product,
+        'Product deleted successfully',
+      ),
+    );
 };
 
 export const getRecommendedProducts = async (req, res, next) => {
@@ -183,7 +183,7 @@ export const toggleFeaturedProduct = async (req, res) => {
 
   return res
     .status(StatusCodes.NOT_FOUND)
-    .json(new ApiError(StatusCodes.NOT_FOUND, null, 'Product not found'));
+    .json(new ApiError(StatusCodes.NOT_FOUND, 'Product not found'));
 };
 
 async function updateFeaturedProductsInRedis() {

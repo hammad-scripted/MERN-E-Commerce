@@ -11,7 +11,6 @@ import LoadingSpinner from './components/LoadingSpinner.jsx';
 import { useEffect } from 'react';
 import { CategoryPage } from './pages/CategoryPage.jsx';
 import { useCartStore } from './stores/useCartStore.js';
-import PurchaseSuccess from './pages/PurchaseSuccessPage.jsx';
 import PurchaseSuccessPage from './pages/PurchaseSuccessPage.jsx';
 import PurchaseCancelPage from './pages/PurchaseCancelPage';
 export const App = () => {

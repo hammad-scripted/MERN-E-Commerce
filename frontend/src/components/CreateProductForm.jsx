@@ -26,7 +26,9 @@ export const CreateProductForm = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    await createProduct(newProduct);
+    const wasCreated = await createProduct(newProduct);
+    if (!wasCreated) return;
+
     setNewProduct({
       name: '',
       description: '',
