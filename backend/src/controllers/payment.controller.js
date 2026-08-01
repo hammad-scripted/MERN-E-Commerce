@@ -14,12 +14,12 @@ export const createCheckoutSession = async (req, res, next) => {
     return next(new ApiError(StatusCodes.BAD_REQUEST, 'Invalid products'));
   }
 
-  let totalAmount = 0;
+  let originalAmount = 0;
 
   const lineItems = products.map((product) => {
     const amount = Math.round(product.price * 100);
 
-    totalAmount += amount * product.quantity;
+    originalAmount += amount * product.quantity;
 
     return {
       price_data: {
@@ -47,9 +47,12 @@ export const createCheckoutSession = async (req, res, next) => {
       return next(new ApiError(StatusCodes.BAD_REQUEST, 'Invalid coupon code'));
     }
 
-    totalAmount = Math.round(
-      totalAmount * (1 - coupon.discountPercentage / 100),
-    );
+    if (coupon.expirationDate < new Date()) {
+      coupon.isActive = false;
+      await coupon.save();
+
+      return next(new ApiError(StatusCodes.BAD_REQUEST, 'Coupon Code expired'));
+    }
   }
 
   const session = await stripe.checkout.sessions.create({
@@ -74,13 +77,12 @@ export const createCheckoutSession = async (req, res, next) => {
           quantity: product.quantity,
           price: product.price,
           id: product._id.toString(),
-         
         })),
       ),
     },
   });
 
-  if (totalAmount >= 20000) {
+  if (originalAmount >= 20000) {
     await createNewCoupon(req.user._id);
   }
 
@@ -90,7 +92,7 @@ export const createCheckoutSession = async (req, res, next) => {
       {
         id: session.id,
         url: session.url,
-        totalAmount: totalAmount / 100,
+        totalAmount: session.amount_total / 100,
       },
       'Checkout session created successfully',
     ),
@@ -107,7 +109,9 @@ async function createStripeCoupon(discountPercentage) {
 }
 
 async function createNewCoupon(userId) {
-  await Coupon.create({
+
+  await Coupon.findOneAndDelete({ userId});
+  const newCoupon = await Coupon.create({
     userId,
     code: 'GIFT' + Math.random().toString(36).substring(2, 9).toUpperCase(),
     discountPercentage: 10,

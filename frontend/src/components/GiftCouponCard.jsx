@@ -13,21 +13,15 @@ const GiftCouponCard = () => {
         removeCoupon,
     } = useCartStore();
 
+    const displayedCouponCode = userInputCode || coupon?.code || "";
+
     useEffect(() => {
         getMyCoupon();
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
-    useEffect(() => {
-        if (coupon) {
-            setUserInputCode(coupon.code);
-        } else {
-            setUserInputCode("");
-        }
-    }, [coupon]);
-
     const handleApplyCoupon = () => {
-        const code = userInputCode.trim();
+        const code = (userInputCode || coupon?.code || "").trim();
 
         if (!code) return;
 
@@ -60,7 +54,7 @@ const GiftCouponCard = () => {
                         id="voucher"
                         className="block w-full rounded-lg border border-gray-600 bg-gray-700 p-2.5 text-sm text-white placeholder-gray-400 focus:border-emerald-500 focus:ring-emerald-500"
                         placeholder="Enter code here"
-                        value={userInputCode}
+                        value={displayedCouponCode}
                         onChange={(e) => setUserInputCode(e.target.value)}
                     />
                 </div>
@@ -104,13 +98,17 @@ const GiftCouponCard = () => {
             )}
 
             {coupon && !isCouponApplied && (
-                <div className="mt-4">
-                    <h3 className="text-lg font-medium text-gray-300">
+                <div className="mt-4 rounded-md border border-emerald-500/40 bg-emerald-900/20 p-3">
+                    <h3 className="text-lg font-medium text-emerald-300">
                         Your Available Coupon
                     </h3>
 
-                    <p className="mt-2 text-sm text-gray-400">
-                        {coupon.code} - {coupon.discountPercentage}% off
+                    <p className="mt-2 text-sm text-gray-200">
+                        Code: <span className="font-semibold text-white">{coupon.code}</span>
+                    </p>
+
+                    <p className="mt-1 text-sm text-gray-300">
+                        {coupon.discountPercentage}% off
                     </p>
                 </div>
             )}
