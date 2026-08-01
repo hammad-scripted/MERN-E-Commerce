@@ -9,6 +9,7 @@ import chalk from 'chalk';
 import morgan from 'morgan';
 import cors from 'cors';
 import path from 'path';
+import fs from 'fs';
 import errorHandler from './errors/errorHandler.js';
 import notFound from './errors/notFound.js';
 import { connectDB } from './db/connect.js';
@@ -16,7 +17,21 @@ import { connectDB } from './db/connect.js';
 const PORT = process.env.PORT || 5000;
 const app = express();
 const appRoot = process.cwd();
-const frontendDistPath = path.resolve(appRoot, '../frontend/dist');
+const possibleFrontendDistPaths = [
+  path.resolve(appRoot, 'frontend/dist'),
+  path.resolve(appRoot, '../frontend/dist'),
+  path.resolve(appRoot, 'backend/frontend/dist'),
+];
+
+const frontendDistPath = possibleFrontendDistPaths.find((distPath) => {
+  return fs.existsSync(distPath) && fs.existsSync(path.join(distPath, 'index.html'));
+});
+
+const frontendIndexPath = frontendDistPath
+  ? path.join(frontendDistPath, 'index.html')
+  : null;
+
+const hasFrontendBuild = Boolean(frontendDistPath && frontendIndexPath);
 
 import { router as authRouter } from './routes/auth.route.js';
 import { router as productRouter } from './routes/product.route.js';
@@ -53,7 +68,7 @@ app.use(notFound);
 app.use(errorHandler);
 
 
-if (process.env.NODE_ENV === 'production') {
+if (hasFrontendBuild && frontendDistPath && frontendIndexPath) {
   app.use(express.static(frontendDistPath));
 
   app.get('*', (req, res, next) => {
@@ -61,7 +76,7 @@ if (process.env.NODE_ENV === 'production') {
       return next();
     }
 
-    return res.sendFile(path.join(frontendDistPath, 'index.html'));
+    return res.sendFile(frontendIndexPath);
   });
 }
 const startServer = async () => {
