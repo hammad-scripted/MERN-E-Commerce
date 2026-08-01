@@ -16,6 +16,11 @@ import { connectDB } from './db/connect.js';
 
 const PORT = process.env.PORT || 5000;
 const app = express();
+const allowedOrigins = [
+  'http://localhost:5173',
+  'https://mern-e-commerce-xrw8.onrender.com',
+  process.env.CLIENT_URL,
+].filter(Boolean);
 const appRoot = process.cwd();
 const possibleFrontendDistPaths = [
   path.resolve(appRoot, 'frontend/dist'),
@@ -47,12 +52,20 @@ app.use(cookieParser());
 app.use(morgan('dev'));
 app.use(
   cors({
-  origin: process.env.CLIENT_URL, // "http://localhost:5173"
-  credentials: true,
-  optionsSuccessStatus: 200,
-  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
-})
+    origin: (origin, callback) => {
+      // Requests without an Origin header (for example server health checks)
+      // do not need CORS validation.
+      if (!origin || allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+
+      return callback(new Error('Not allowed by CORS'));
+    },
+    credentials: true,
+    optionsSuccessStatus: 200,
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+  }),
 );
 
 //! Routes
