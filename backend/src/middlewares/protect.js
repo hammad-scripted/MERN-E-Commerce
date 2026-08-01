@@ -21,7 +21,6 @@ export const protectRoute=async(req,res,next)=>{
     if(!user){
         return res.status(StatusCodes.UNAUTHORIZED).json(new ApiError(StatusCodes.UNAUTHORIZED,null,'Unauthorized:User not found'));    
     }
-    console.log(user);
     req.user=user;
     next();
 }

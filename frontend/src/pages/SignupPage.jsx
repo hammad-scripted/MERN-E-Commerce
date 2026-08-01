@@ -13,11 +13,9 @@ export const SignupPage = () => {
   });
 
   const { signup, loading } = useUserStore();
-  console.log(signup);
 // const loading=false;
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log(formData);
     signup(formData);
   };
 

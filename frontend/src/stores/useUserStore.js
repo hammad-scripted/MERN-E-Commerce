@@ -50,7 +50,6 @@ export const useUserStore = create((set, get) => ({
     } catch (error) {
       // expected when the user isn't logged in — fail silently, no toast
       set({ user: null, checkingAuth: false });
-      console.log(error);
     }
   },
 
@@ -98,8 +97,7 @@ axiosInstance.interceptors.response.use(
       originalRequest.headers.Authorization = `Bearer ${accessToken}`;
 
       return axiosInstance(originalRequest);
-    } catch (refreshError) {
-      console.log(refreshError);
+    } catch {
       return Promise.reject(error);
     } finally {
       refreshingToken = null;

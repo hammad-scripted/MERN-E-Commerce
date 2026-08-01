@@ -25,7 +25,6 @@ const OrderSummary = () => {
         });
 
         const session = res.data.data;
-        console.log(session)
         window.location.href = session.url;
 
         

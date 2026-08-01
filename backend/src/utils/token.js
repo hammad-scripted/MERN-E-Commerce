@@ -43,6 +43,6 @@ export const storeRefreshToken = async (userId, refreshToken) => {
     await client.set(userId, refreshToken, 'EX', 7 * 24 * 60 * 60); // Store for 7 days
   }
   catch (error) {
-    console.log(error);
+    console.error('Failed to store refresh token:', error);
   }
 }

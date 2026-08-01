@@ -26,19 +26,14 @@ export const CreateProductForm = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log(newProduct);
-    try {
-      await createProduct(newProduct);
-      setNewProduct({
-        name: '',
-        description: '',
-        price: '',
-        category: '',
-        image: '',
-      });
-    } catch {
-      console.log('error creating a product');
-    }
+    await createProduct(newProduct);
+    setNewProduct({
+      name: '',
+      description: '',
+      price: '',
+      category: '',
+      image: '',
+    });
   };
 
   const handleImageChange = (e) => {

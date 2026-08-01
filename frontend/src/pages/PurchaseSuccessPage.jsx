@@ -1,5 +1,5 @@
 import { ArrowRight, CheckCircle, HandHeart } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { useCartStore } from "../stores/useCartStore";
 import axiosInstance from "../lib/axios";
@@ -8,6 +8,7 @@ import Confetti from "react-confetti";
 const PurchaseSuccessPage = () => {
     const sessionId = new URLSearchParams(window.location.search).get("session_id");
     const [isProcessing, setIsProcessing] = useState(Boolean(sessionId));
+    const processedSessionId = useRef(null);
     const { clearCart } = useCartStore();
     const error = sessionId ? null : "No session ID found in the URL";
 
@@ -19,13 +20,16 @@ const PurchaseSuccessPage = () => {
                 });
                 clearCart();
             } catch (error) {
-                console.log(error);
+                console.error("Failed to complete checkout:", error);
             } finally {
                 setIsProcessing(false);
             }
         };
 
-        if (sessionId) {
+        // React Strict Mode runs effects twice in development. Only complete a
+        // Stripe session once so the order-creation request is not duplicated.
+        if (sessionId && processedSessionId.current !== sessionId) {
+            processedSessionId.current = sessionId;
             handleCheckoutSuccess(sessionId);
         }
     }, [clearCart, sessionId]);

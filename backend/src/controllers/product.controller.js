@@ -192,6 +192,6 @@ async function updateFeaturedProductsInRedis() {
 
     await client.set('featured-products', JSON.stringify(featuredProducts));
   } catch (error) {
-    console.log(error);
+    console.error('Failed to refresh featured-products cache:', error);
   }
 }

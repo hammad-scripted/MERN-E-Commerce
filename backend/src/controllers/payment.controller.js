@@ -165,16 +165,23 @@ export const createSuccessSession = async (req, res, next) => {
 
   const products = JSON.parse(session.metadata.products);
 
-  const newOrder = await Order.create({
-    user: session.metadata.userId,
-    products: products.map((product) => ({
-      product: product.id,
-      quantity: product.quantity,
-      price: product.price,
-    })),
-    totalAmount: session.amount_total / 100,
-    stripeSessionId: session.id,
-  });
+  // This makes completion safe if the browser retries a successful payment.
+  const newOrder = await Order.findOneAndUpdate(
+    { stripeSessionId: session.id },
+    {
+      $setOnInsert: {
+        user: session.metadata.userId,
+        products: products.map((product) => ({
+          product: product.id,
+          quantity: product.quantity,
+          price: product.price,
+        })),
+        totalAmount: session.amount_total / 100,
+        stripeSessionId: session.id,
+      },
+    },
+    { new: true, upsert: true },
+  );
 
   return res.status(StatusCodes.OK).json(
     new ApiResponse(
