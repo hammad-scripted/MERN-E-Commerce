@@ -178,6 +178,17 @@ export const createSuccessSession = async (req, res, next) => {
     return next(new ApiError(StatusCodes.FORBIDDEN, 'Checkout session belongs to another user'));
   }
 
+  let purchasedProducts;
+  try {
+    purchasedProducts = JSON.parse(session.metadata.products);
+  } catch {
+    return next(new ApiError(StatusCodes.BAD_REQUEST, 'Invalid checkout session products'));
+  }
+
+  if (!Array.isArray(purchasedProducts)) {
+    return next(new ApiError(StatusCodes.BAD_REQUEST, 'Invalid checkout session products'));
+  }
+
   const existingOrder = await Order.findOne({
     stripeSessionId: session.id,
   });
@@ -204,15 +215,13 @@ export const createSuccessSession = async (req, res, next) => {
     );
   }
 
-  const products = JSON.parse(session.metadata.products);
-
   // This makes completion safe if the browser retries a successful payment.
   const newOrder = await Order.findOneAndUpdate(
     { stripeSessionId: session.id },
     {
       $setOnInsert: {
         user: session.metadata.userId,
-        products: products.map((product) => ({
+        products: purchasedProducts.map((product) => ({
           product: product.id,
           quantity: product.quantity,
           price: product.price,
