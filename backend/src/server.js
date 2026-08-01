@@ -8,7 +8,7 @@ import express from 'express';
 import chalk from 'chalk';
 import morgan from 'morgan';
 import cors from 'cors';
-
+import path from 'path';
 import errorHandler from './errors/errorHandler.js';
 import notFound from './errors/notFound.js';
 import { connectDB } from './db/connect.js';
@@ -16,6 +16,8 @@ import { connectDB } from './db/connect.js';
 const PORT = process.env.PORT || 5000;
 
 const app = express();
+
+const __dirname =path.resolve();
 
 import { router as authRouter } from './routes/auth.route.js';
 import { router as productRouter } from './routes/product.route.js';
@@ -51,6 +53,13 @@ app.use('/api/v1/analytics', analyticsRouter);
 app.use(notFound);
 app.use(errorHandler);
 
+
+if( process.env.NODE_ENV === 'production'){
+  app.use(express.static(path.resolve(__dirname, '/frontend/dist')));
+  app.get('*', (req, res) => {
+    res.sendFile(path.resolve(__dirname, '../frontend/dist', 'index.html'));
+  });
+}
 const startServer = async () => {
   try {
     await connectDB();
