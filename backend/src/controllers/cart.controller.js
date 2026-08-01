@@ -1,4 +1,5 @@
 import { Product } from '../models/product.model.js';
+import { User } from '../models/user.model.js';
 import ApiError from '../utils/apiError.js';
 import ApiResponse from '../utils/apiResponse.js';
 import { StatusCodes } from 'http-status-codes';
@@ -45,17 +46,33 @@ export const addToCart = async (req, res, next) => {
 };
 
 export const removeAllFromCart = async (req, res, next) => {
-  const { productId } = req.body;
+  const { productId } = req.body || {};
 
   const user = req.user;
 
   if (!productId) {
-    user.cartItems = [];
-  } else {
-    user.cartItems = user.cartItems.filter(
-      (item) => item.product.toString() !== productId
+    const updatedUser = await User.findByIdAndUpdate(
+      user._id,
+      { $set: { cartItems: [] } },
+      { new: true },
+    );
+
+    if (!updatedUser) {
+      return next(new ApiError(StatusCodes.NOT_FOUND, 'User not found'));
+    }
+
+    return res.status(StatusCodes.OK).json(
+      new ApiResponse(
+        StatusCodes.OK,
+        updatedUser.cartItems,
+        'Cart cleared successfully',
+      ),
     );
   }
+
+  user.cartItems = user.cartItems.filter(
+    (item) => item.product.toString() !== productId
+  );
 
   await user.save();
 

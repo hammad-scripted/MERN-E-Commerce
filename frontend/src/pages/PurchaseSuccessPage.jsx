@@ -1,4 +1,4 @@
-import { ArrowRight, CheckCircle, HandHeart } from "lucide-react";
+import { ArrowRight, CheckCircle, HandHeart, LoaderCircle, AlertCircle } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { useCartStore } from "../stores/useCartStore";
@@ -8,6 +8,7 @@ import Confetti from "react-confetti";
 const PurchaseSuccessPage = () => {
     const sessionId = new URLSearchParams(window.location.search).get("session_id");
     const [isProcessing, setIsProcessing] = useState(Boolean(sessionId));
+    const [checkoutError, setCheckoutError] = useState(null);
     const processedSessionId = useRef(null);
     const { clearCart } = useCartStore();
     const error = sessionId ? null : "No session ID found in the URL";
@@ -18,9 +19,13 @@ const PurchaseSuccessPage = () => {
                 await axiosInstance.post("/payment/checkout-success", {
                     sessionId,
                 });
-                await clearCart();
+                const wasCartCleared = await clearCart();
+                if (!wasCartCleared) {
+                    setCheckoutError("Payment succeeded, but we could not clear your cart. Please refresh this page.");
+                }
             } catch (error) {
                 console.error("Failed to complete checkout:", error);
+                setCheckoutError("We could not confirm your payment. Please refresh the page or contact support.");
             } finally {
                 setIsProcessing(false);
             }
@@ -34,9 +39,32 @@ const PurchaseSuccessPage = () => {
         }
     }, [clearCart, sessionId]);
 
-    if (isProcessing) return "Processing...";
+    if (isProcessing) {
+        return (
+            <div className='min-h-screen flex items-center justify-center px-4'>
+                <div className='w-full max-w-md rounded-lg border border-emerald-500/30 bg-gray-800 p-8 text-center shadow-xl'>
+                    <LoaderCircle className='mx-auto mb-4 h-12 w-12 animate-spin text-emerald-400' />
+                    <h1 className='text-2xl font-bold text-white'>Confirming your payment</h1>
+                    <p className='mt-2 text-gray-300'>Please do not close this page.</p>
+                </div>
+            </div>
+        );
+    }
 
-    if (error) return `Error: ${error}`;
+    if (error || checkoutError) {
+        return (
+            <div className='min-h-screen flex items-center justify-center px-4'>
+                <div className='w-full max-w-md rounded-lg border border-red-500/30 bg-gray-800 p-8 text-center shadow-xl'>
+                    <AlertCircle className='mx-auto mb-4 h-12 w-12 text-red-400' />
+                    <h1 className='text-2xl font-bold text-white'>Checkout needs attention</h1>
+                    <p className='mt-2 text-gray-300'>{checkoutError || error}</p>
+                    <Link to='/' className='mt-6 inline-flex items-center text-emerald-400 hover:text-emerald-300'>
+                        Return home <ArrowRight className='ml-2' size={18} />
+                    </Link>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className='h-screen flex items-center justify-center px-4'>
@@ -67,7 +95,7 @@ const PurchaseSuccessPage = () => {
                     <div className='bg-gray-700 rounded-lg p-4 mb-6'>
                         <div className='flex items-center justify-between mb-2'>
                             <span className='text-sm text-gray-400'>Order number</span>
-                            <span className='text-sm font-semibold text-emerald-400'>#12345</span>
+                            <span className='text-sm font-semibold text-emerald-400'>#{sessionId.slice(-8).toUpperCase()}</span>
                         </div>
                         <div className='flex items-center justify-between'>
                             <span className='text-sm text-gray-400'>Estimated delivery</span>

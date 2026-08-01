@@ -108,8 +108,10 @@ export const useCartStore = create((set, get) => ({
     try {
       await axiosInstance.delete('/cart');
       set({ cart: [],coupon: null, isCouponApplied: false, total: 0, subtotal: 0 });
+      return true;
     } catch (error) {
       toast.error(error.response?.data?.message || 'Unable to clear the cart');
+      return false;
     }
   },
 
