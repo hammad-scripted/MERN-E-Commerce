@@ -23,15 +23,25 @@ export const getFeaturedProducts = async (req, res, next) => {
   let featuredProducts = await client.get('featured-products');
 
   if (featuredProducts) {
-    return res
-      .status(StatusCodes.OK)
-      .json(
+    try {
+      const parsedFeaturedProducts = JSON.parse(featuredProducts);
+
+      return res.status(StatusCodes.OK).json(
         new ApiResponse(
           StatusCodes.OK,
-          featuredProducts,
+          parsedFeaturedProducts,
           'Featured products fetched successfully',
         ),
       );
+    } catch {
+      return res.status(StatusCodes.OK).json(
+        new ApiResponse(
+          StatusCodes.OK,
+          [],
+          'Featured products fetched successfully',
+        ),
+      );
+    }
   }
 
   // ?if not in redis, fetch from mongodb
