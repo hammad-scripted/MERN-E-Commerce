@@ -12,9 +12,9 @@ const PeopleAlsoBought = () => {
         const fetchRecommendations = async () => {
             try {
                 const res = await axiosInstance.get("/product/recommended");
-                setRecommendations(res.data);
+                setRecommendations(res.data.data);
             } catch (error) {
-                toast.error(error.response.data.message || "An error occurred while fetching recommendations");
+                toast.error(error.response?.data?.errors || "An error occurred while fetching recommendations");
             } finally {
                 setIsLoading(false);
             }

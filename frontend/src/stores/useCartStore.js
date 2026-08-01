@@ -8,29 +8,29 @@ export const useCartStore = create((set, get) => ({
   total: 0,
   subtotal: 0,
   isCouponApplied: false,
-getMyCoupon: async () => {
-		try {
-			const response = await axiosInstance.get("/coupon");
-			set({ coupon: response.data.data });
-		} catch (error) {
-			console.error("Error fetching coupon:", error);
-		}
-	},
-	applyCoupon: async (code) => {
-		try {
-			const response = await axiosInstance.post("/coupon/validate", { code });
-			set({ coupon: response.data.data, isCouponApplied: true });
-			get().calculateTotals();
-			toast.success("Coupon applied successfully");
-		} catch (error) {
-			toast.error(error.response?.data?.message || "Failed to apply coupon");
-		}
-	},
-	removeCoupon: () => {
-		set({ coupon: null, isCouponApplied: false });
-		get().calculateTotals();
-		toast.success("Coupon removed");
-	},
+  getMyCoupon: async () => {
+    try {
+      const response = await axiosInstance.get('/coupon');
+      set({ coupon: response.data.data });
+    } catch (error) {
+      console.error('Error fetching coupon:', error);
+    }
+  },
+  applyCoupon: async (code) => {
+    try {
+      const response = await axiosInstance.post('/coupon/validate', { code });
+      set({ coupon: response.data.data, isCouponApplied: true });
+      get().calculateTotals();
+      toast.success('Coupon applied successfully');
+    } catch (error) {
+      toast.error(error.response?.data?.errors || 'Failed to apply coupon');
+    }
+  },
+  removeCoupon: () => {
+    set({ coupon: null, isCouponApplied: false });
+    get().calculateTotals();
+    toast.success('Coupon removed');
+  },
   getCartItems: async () => {
     try {
       const response = await axiosInstance.get('/cart');
@@ -38,7 +38,7 @@ getMyCoupon: async () => {
       get().calculateTotals();
     } catch (error) {
       set({ cart: [] });
-      toast.error(error.response?.data?.message || 'An error occurred');
+      toast.error(error.response?.data?.errors || 'An error occurred');
     }
   },
 
@@ -63,7 +63,7 @@ getMyCoupon: async () => {
       });
       get().calculateTotals();
     } catch (error) {
-      toast.error(error.response?.data?.message || 'An error occurred');
+      toast.error(error.response?.data?.errors || 'An error occurred');
     }
   },
 
@@ -76,7 +76,7 @@ getMyCoupon: async () => {
     get().calculateTotals();
   },
   updateQuantity: async (productId, quantity) => {
-    await axiosInstance.put(`/cart`, { productId, quantity });
+    await axiosInstance.put(`/cart/${productId}`, { productId, quantity });
     toast.success('Quantity updated successfully!');
     set((prevState) => ({
       cart: prevState.cart.map((item) =>

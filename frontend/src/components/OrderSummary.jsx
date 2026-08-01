@@ -25,13 +25,10 @@ const OrderSummary = () => {
         });
 
         const session = res.data.data;
-        const result = await stripe.redirectToCheckout({
-            sessionId: session.id,
-        });
+        console.log(session)
+        window.location.href = session.url;
 
-        if (result.error) {
-            console.error("Error:", result.error);
-        }
+        
     };
 
     return (

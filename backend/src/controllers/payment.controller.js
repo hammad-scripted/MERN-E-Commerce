@@ -89,6 +89,7 @@ export const createCheckoutSession = async (req, res, next) => {
       true,
       {
         id: session.id,
+        url: session.url,
         totalAmount: totalAmount / 100,
       },
       'Checkout session created successfully',

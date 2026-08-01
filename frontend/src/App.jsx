@@ -60,7 +60,7 @@ export const App = () => {
           ></Route>
 
           <Route
-            path="purchase-success"
+            path="/success"
             element={user ? <PurchaseSuccess /> : <Navigate to="/login" />}
           ></Route>
         </Routes>
