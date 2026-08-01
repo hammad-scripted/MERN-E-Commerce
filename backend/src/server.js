@@ -16,9 +16,10 @@ import { connectDB } from './db/connect.js';
 
 const PORT = process.env.PORT || 5000;
 const app = express();
+const deployedFrontendOrigin = 'https://mern-e-commerce-xrw8.onrender.com';
 const allowedOrigins = [
   'http://localhost:5173',
-  'https://mern-e-commerce-xrw8.onrender.com',
+  deployedFrontendOrigin,
   process.env.CLIENT_URL,
 ].filter(Boolean);
 const appRoot = process.cwd();

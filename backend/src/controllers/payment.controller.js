@@ -9,6 +9,8 @@ import { stripe } from '../lib/stripe.js';
 import {Order} from '../models/order.model.js';
 export const createCheckoutSession = async (req, res, next) => {
   const { products, couponCode } = req.body;
+  const frontendOrigin =
+    req.headers.origin || process.env.CLIENT_URL || 'https://mern-e-commerce-xrw8.onrender.com';
 
   if (!Array.isArray(products) || products.length === 0) {
     return next(new ApiError(StatusCodes.BAD_REQUEST, 'Invalid products'));
@@ -59,8 +61,8 @@ export const createCheckoutSession = async (req, res, next) => {
     payment_method_types: ['card'],
     mode: 'payment',
     line_items: lineItems,
-    success_url: `${process.env.CLIENT_URL}/success?session_id={CHECKOUT_SESSION_ID}`,
-    cancel_url: `${process.env.CLIENT_URL}/cancel`,
+    success_url: `${frontendOrigin}/success?session_id={CHECKOUT_SESSION_ID}`,
+    cancel_url: `${frontendOrigin}/cancel`,
     discounts: coupon
       ? [
           {
