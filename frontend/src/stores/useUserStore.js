@@ -71,8 +71,16 @@ axiosInstance.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
+    const isRefreshRequest = originalRequest?.url?.includes('auth/refresh-token');
 
-    if (!error.response || error.response.status !== 401 || originalRequest._retry) {
+    // A guest has no refresh-token cookie. Do not try to refresh the refresh
+    // request itself, otherwise its 401 response creates an endless loop.
+    if (
+      !error.response ||
+      error.response.status !== 401 ||
+      originalRequest._retry ||
+      isRefreshRequest
+    ) {
       return Promise.reject(error);
     }
 
