@@ -63,11 +63,8 @@ app.use('/api/v1/coupon', couponRouter);
 app.use('/api/v1/payment', paymentRouter);
 app.use('/api/v1/analytics', analyticsRouter);
 
-//! Error Middlewares
-app.use(notFound);
-app.use(errorHandler);
-
-
+// Serve the Vite production build after API routes. This must be registered
+// before the 404 middleware so browser requests such as GET / reach React.
 if (hasFrontendBuild && frontendDistPath && frontendIndexPath) {
   app.use(express.static(frontendDistPath));
 
@@ -79,6 +76,10 @@ if (hasFrontendBuild && frontendDistPath && frontendIndexPath) {
     return res.sendFile(frontendIndexPath);
   });
 }
+
+//! Error Middlewares
+app.use(notFound);
+app.use(errorHandler);
 const startServer = async () => {
   try {
     await connectDB();
